@@ -1,13 +1,10 @@
 # Impervious DID Spec
 
-`TODO expand on the technical primer`
-
-How we utilize the DID spec for our applications. 
-
+This specification describes how Impervious is implementing [Decentralized Identifiers](https://www.w3.org/TR/did-core/), [DIDComm Messaging](https://identity.foundation/didcomm-messaging/spec/), and other DID concepts in the Impervious Browser.
 
 ## Service Endpoint Examples
 
-`TODO explain this`
+The DID specification is highly adaptable and generalized to support many use cases. Many of these use cases revolve around the use of [service endpoints](https://www.w3.org/TR/did-core/#services). See this example below:
 
 ```
 {
@@ -29,10 +26,30 @@ How we utilize the DID spec for our applications.
 
 ```
 
+This list of services are two ways of claiming ownership of domains via service endpoints inside of a DID document.
+
+- `id`: a URI referring to the name of this service, for readability and accessibility. This can be set to anything unique to the document.
+- `type`: The type of service endpoint this is. In this example, implementors are to understand that a service endpoint with `type` set to `LinkedDomains` means that the DID is claiming ownership over the domains in the `serviceEndpoint` field.
+- `serviceEndpoint`: The URI or object describing what or where the subject is. In this case, the `LinkedDomain` service endpoint `type` is specifying `https://foo.example.com`, `https://identity.foundation`, and `https://bar.example.com` as the domains being linked.
+
+
+The concept of service endpoints is the basis for much of what this document describes below.
+
 
 ## Bitcoin Service Endpoints
 
+This section describes how to express Bitcoin-related concepts into Decentralized Identifiers through the use of service endpoints. Including a bitcoin-related service endpoint into a DID document can be implied to mean that the owner of the DID is willing to receive Bitcoin through the service endpoints. While it does not require a given service endpoint to belong to the owner of the DID, it SHOULD be understood that owner is directing others to the service endpoints as ways to pay the owner.
+
 ### Keysend / AMP
+
+[Keysend](https://github.com/lightning/blips/blob/master/blip-0003.md) is a method to push Bitcoin through to a Lightning node by specifying just the public key of the node. AMP (TBD specification) is an improvement to that but accomplishes a similar goal.
+
+By including this service, the owner of the DID is specifying that this lightning public key is available to receive lightning payments via Keysend/AMP. Most commonly this will be one of the owner's Lightning nodes, but it is not a requirement.
+
+- `type` MUST be set to `LNPubkey`
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consist of `lightning` as the prefix and the 32 byte lightning public key of the 
+
+Example:
 
 ```
 {
