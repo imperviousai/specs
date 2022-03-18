@@ -38,16 +38,16 @@ The concept of service endpoints is the basis for much of what this document des
 
 ## Bitcoin Service Endpoints
 
-This section describes how to express Bitcoin-related concepts into Decentralized Identifiers through the use of service endpoints. Including a bitcoin-related service endpoint into a DID document can be implied to mean that the owner of the DID is willing to receive Bitcoin through the service endpoints. While it does not require a given service endpoint to belong to the owner of the DID, it SHOULD be understood that owner is directing others to the service endpoints as ways to pay the owner.
+This section describes how to express Bitcoin-related concepts into Decentralized Identifiers through the use of service endpoints. Including a bitcoin-related service endpoint into a DID document can be implied to mean that the owner of the DID is willing to receive Bitcoin through the service endpoints. While it does not require a given service endpoint to belong to the owner of the DID, it SHOULD be understood that owner is directing others to the service endpoints as ways to pay or communicate with the owner.
 
 ### Keysend / AMP
 
 [Keysend](https://github.com/lightning/blips/blob/master/blip-0003.md) is a method to push Bitcoin through to a Lightning node by specifying just the public key of the node. AMP (TBD specification) is an improvement to that but accomplishes a similar goal.
 
-By including this service, the owner of the DID is specifying that this lightning public key is available to receive lightning payments via Keysend/AMP. Most commonly this will be one of the owner's Lightning nodes, but it is not a requirement.
+By including this service, the owner of the DID is specifying that this lightning public key is available to receive lightning payments via Keysend/AMP.
 
 - `type` MUST be set to `LNPubkey`
-- `serviceEndpoint` MUST be set to a colon-deliminated string that first consist of `lightning` as the prefix and the 32 byte lightning public key of the 
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consist of `lightning` as the prefix followed by the 32 byte lightning public key of the node.
 
 Example:
 
@@ -66,12 +66,21 @@ Example:
 
 ### LNURL
 
+[LNURL](https://github.com/fiatjaf/lnurl-rfc) is a specification for interacting with Lightning via URL's. LNURL strings can direct users to pay, receive, log in, open channels, and many other protocols.
+
+By including this service, the owner of the DID is specifying that they are able to be interacted with based on the contents of the LNURL string. The LNURL protocol type will be encoded in the string. Multiple LNURL services may be listed to include multiple LNURL methods.
+
+- `type` MUST be set to `LNURL`
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consists of `lightning` as the prefix followed by the LNURL encoded string.
+
+Example:
+
 ```
 {
 "service": [
     {
-      "id":"did:example:123#lnurl-pay",
-      "type": "LNURL-Pay",
+      "id":"did:example:123#lnurl",
+      "type": "LNURL",
       "serviceEndpoint": "lightning:LNURL..."
     }
   ]
@@ -79,6 +88,15 @@ Example:
 ```
 
 ### Bolt12 Offers
+
+[Bolt12 Offers](https://bolt12.org) are improved static invoices that enable ad hoc payments through a generic, non-amount-dependent bolt12 payment string.
+
+By including this service, the owner of the DID is specifying that they are able to accept funds from others that pay to the specified payment string.
+
+- `type` MUST be set to `LNOffers`
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consists of `lightning` as the prefix followed by the bolt12 payment string.
+
+Example:
 
 ```
 {
@@ -94,6 +112,13 @@ Example:
 
 ### Custodians
 
+The protocol for specifying payments to 3rd parties will be implementation specific to the given custodian. For instance, the Bitcoin custodian Strike has an API for retrieving invoices from a specific user on their platform. This allows others to pay the custodian and specify that it was meant for a given user.
+
+`type` MUST be set to a string that the custodian has delegated as their DID service endpoint type. Until a common protocol for paying custodians is created, there could be many different implementations.
+`serviceEndpoint` MUST be set to a URI specifying through what method the payment information for a given user can be retrieved.
+
+Example:
+
 ```
 {
 "service": [
@@ -108,6 +133,20 @@ Example:
 
 ### BIP47 / Paynyms
 
+[Paynyms](https://paynym.is) allow on-chain payments to a pseudonymous username. A new address is generated using [BIP47](https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki) each time a payment is made to preserve on-chain privacy and transaction security.
+
+There are two options for interacting with paynyms. By including a BIP47 service endpoint, the owner of the DID is specifying the payment code needed for others to pay to new addresses belonging to the owner. By including a Paynym service endpoint, the owner is specifying the directory service that resolves usernames to BIP47 payment codes. 
+
+BIP47:
+- `type` MUST be set to `BIP47`
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consists of `BTC` as the prefix followed by the BIP47 payment code.
+
+Paynym:
+- `type` MUST be set to `Paynym`
+- `serviceEndpoint` MUST be set to a URI specifying through what method the BIP47 payment code for a given nym can be retrieved.
+
+
+Example:
 ```
 {
 "service": [
@@ -127,6 +166,12 @@ Example:
 
 ### Onchain
 
+A static Bitcoin address may be listed as a way to receive payments. Consider the privacy implications of reusing & publicly displaying a Bitcoin address. This should be mainly a fallback option.
+
+- `type` MUST be set to `Bitcoin`
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consists of `BTC` as the prefix followed by the Bitcoin address.
+
+Example:
 ```
 {
 "service": [
@@ -141,23 +186,91 @@ Example:
 
 ### Bitcoin Payment Metadata
 
-TODO maybe put this at the beginning?
-
-For each of the many service endpoint payment types, additional optional metadata can be added to specify preferences for the receiver.
+For each of the many service endpoint payment types, additional optional metadata can be added to specify preferences for the receiver. It's important to note that these are owner specified preferences and are not enforced.
 
 #### Priority
 
-For payment options, a proposal for how the recipient would prefer to get paid can be as simple as putting the parameter "priority": 1.
+When listing multiple payment methods, the owner of a DID can specify their preferences by including a priority field to each service endpoint.
+
+- `priority` is an optional key that MUST be set to a numerical value where the highest priority is 1 and the lowest is any number following it.
+
+Example:
+```
+{
+"service": [
+    {
+      "id":"did:example:123456789abcdefghi#LNPubkey",
+      "type": "LNPubkey",
+      "priority": 1,
+      "serviceEndpoint": "lightning:abc123..."
+    },
+    {
+      "id":"did:example:123456789abcdefghi#BIP47",
+      "type": "BIP47",
+      "priority": 2,
+      "serviceEndpoint": "BTC:PM8T..."
+    },
+    {
+      "id":"did:example:123456789abcdefghi#Bitcoin",
+      "type": "Bitcoin",
+      "priority": 3,
+      "serviceEndpoint": "BTC:bc1..."
+    }
+  ]
+}
+```
+
 
 #### Min / Max
 
-A minimum and maximum satoshi amount can be specified by putting the parameter "minAmountSat": 1 and "maxAmountSat": 100000. Msat & Btc could be supported as well instead of just Sat.
+The owner of a DID can also specify their preferences for amounts when receiving payments through multiple service endpoints.
+
+- `minAmountSat` is an optional key that MUST be set to a numerical value representing the minimum amount of satoshis that payers should send when interacting with the given service endpoint.
+- `maxAmountSat` is an optional key that MUST be set to a numerical value representing the maximum amount of satoshis that payers should send when interacting with the given service endpoint.
+
+
+Example:
+```
+{
+"service": [
+    {
+      "id":"did:example:123456789abcdefghi#LNPubkey",
+      "type": "LNPubkey",
+      "maxAmountSat": 1000000,
+      "serviceEndpoint": "lightning:abc123..."
+    },
+    {
+      "id":"did:example:123456789abcdefghi#BIP47",
+      "type": "BIP47",
+      "minAmountSat": 1000000,
+      "serviceEndpoint": "BTC:PM8T..."
+    },
+    {
+      "id":"did:example:123456789abcdefghi#Bitcoin",
+      "type": "Bitcoin",
+      "minAmountSat": 1000000,
+      "maxAmountSat": 5000000,
+      "serviceEndpoint": "BTC:bc1..."
+    }
+  ]
+}
+
+```
 
 
 ## DID Communication
 
+This section includes information about how to communication between DID owners can occur.
+
 ### Lightning
 
+Several Lightning based communications applications rely on Keysend/AMP to attach messages to the payment TLV records. Those can be specified as a service endpoint.
+
+- `type` MUST be the lightning based communication implementation (Sphinx chat, impervious, etc.)
+- `serviceEndpoint` MUST be set to a colon-deliminated string that first consist of `lightning` as the prefix followed by the 32 byte lightning public key of the node.
+
+
+Example:
 ```
 {
 "service": [
@@ -182,6 +295,15 @@ A minimum and maximum satoshi amount can be specified by putting the parameter "
 
 ### DIDComm
 
+[DIDComm](https://identity.foundation/didcomm-messaging/spec/) is a secure, private communications layer built on top of the decentralized properties of a DID.
+
+By including this service, the owner of the DID is specifying that they are listening to a given transportation method and can understand DIDComm based messages. Multiple service endpoints can be specified for resiliency and redundancy.
+
+- `type` MUST be `DIDCommMessaging`
+- `serviceEndpoint` MUST be set to a URI specifying through what method & transport messages can be sent to.
+
+
+Example:
 ```
 {
 "service": [
@@ -194,51 +316,55 @@ A minimum and maximum satoshi amount can be specified by putting the parameter "
       "id": "did:example:123#didcomm-1",
       "type": "DIDCommMessaging",
       "serviceEndpoint": "http://example.com/path",
-      "priority": 1,
-      "accept": [
-         "didcomm/v2",
-         "didcomm/aip2;env=rfc587"
-       ]
     },
     {
       "id": "did:example:123#didcomm-2",
       "type": "DIDCommMessaging",
       "serviceEndpoint": "did:example:123#LNPubkey",
-      "priority": 2,
-      "minAmountSat": 100,
-      "accept": [
-         "didcomm/v2",
-         "didcomm/aip2;env=rfc587"
-       ]
     }
   ]
 }
 ```
 
-## Relays
 
-TODO, was missing technical specs on this in the original document
+#### DIDComm Mediators
 
-### DIDComm Mediators
+[DIDComm Mediators](https://identity.foundation/didcomm-messaging/spec/#routing) may be used to handle DIDComm on behalf of another individual. DID owners can delegate communication to another DID by linking the mediator DID. E2EE SHOULD be used to ensure mediators cannot see the contents of the message.
 
-### Lightning Payment/Communication Mailboxes
+Example:
 
+```
+{
+"service": [
+    {
+      "id": "did:example:123#didcomm-1",
+      "type": "DIDCommMessaging",
+      "serviceEndpoint": "did:example:somemediator",
+    },
+  ]
+}
+```
 
 ## Supporting DID Ecosystem
 
-`this is more of an additional explanations on how dids could function/resolve`
+A variety of supporting DID specifications can be utilized in the management and resolution of DIDs.
 
 ### Well Known DID
 
+[Well Known DID](https://www.ietf.org/archive/id/draft-mayrhofer-did-dns-05.txt) allows for DIDs to be specified in DNS records. This allows for interacting with rememberable website URLs instead of long DID text strings.
+
+
+Example:
 ```
 _did.example.net.  IN URI 100 10 "did:example:1234abcd"
 ```
 
 
-
 ## Examples
 
 ### Complete
+
+The following example shows a DID document utilizing all of the payment & communication service endpoints featured in this technical specification.
 
 ```
 {
