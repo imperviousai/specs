@@ -2,4 +2,4 @@
 
 ## DID Specification
 
-DID-based interactions that Impervious is using is specified [here](./did-spec).
+DID-based interactions that Impervious is using is specified [here](./did-usage.md).
