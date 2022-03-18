@@ -114,8 +114,8 @@ Example:
 
 The protocol for specifying payments to 3rd parties will be implementation specific to the given custodian. For instance, the Bitcoin custodian Strike has an API for retrieving invoices from a specific user on their platform. This allows others to pay the custodian and specify that it was meant for a given user.
 
-`type` MUST be set to a string that the custodian has delegated as their DID service endpoint type. Until a common protocol for paying custodians is created, there could be many different implementations.
-`serviceEndpoint` MUST be set to a URI specifying through what method the payment information for a given user can be retrieved.
+- `type` MUST be set to a string that the custodian has delegated as their DID service endpoint type. Until a common protocol for paying custodians is created, there could be many different implementations.
+- `serviceEndpoint` MUST be set to a URI specifying through what method the payment information for a given user can be retrieved.
 
 Example:
 
