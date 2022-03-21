@@ -1,4 +1,4 @@
-# Impervious Technologies Inc: Decentralized Indentifiers ("DID") Spec
+# Impervious Technologies: Decentralized Indentifiers ("DID") Spec
 
 ## [impervious.ai](https://impervious.ai)
 
