@@ -1,6 +1,6 @@
 # Impervious Technologies Inc: Decentralized Indentifiers ("DID") Spec
 
-## https://impervious.ai
+## [impervious.ai](https://impervious.ai)
 
 This specification describes how Impervious is implementing [Decentralized Identifiers](https://www.w3.org/TR/did-core/), [DIDComm Messaging](https://identity.foundation/didcomm-messaging/spec/), and other DID concepts in the Impervious Browser.
 
