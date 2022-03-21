@@ -466,3 +466,5 @@ The following example shows a DID document utilizing all of the payment & commun
   ]
 }
 ```
+
+Copyright (C) 2022 Impervious Technologies Inc.
