@@ -2,11 +2,11 @@
 
 ## [impervious.ai](https://impervious.ai)
 
-This specification describes how Impervious is implementing [Decentralized Identifiers](https://www.w3.org/TR/did-core/), [DIDComm Messaging](https://identity.foundation/didcomm-messaging/spec/), and other DID concepts in the Impervious Browser.
+This specification describes how Impervious is implementing [Decentralized Identifiers](https://www.w3.org/TR/did-core/), [DIDComm Messaging](https://identity.foundation/didcomm-messaging/spec/), and other DID concepts into the Impervious Browser.
 
 ## Service Endpoint Examples
 
-The DID specification is highly adaptable and generalized to support many use cases. Many of these use cases revolve around the use of [service endpoints](https://www.w3.org/TR/did-core/#services). See this example below:
+The DID specification is highly adaptable and generalized to various many use cases. Many of these use cases involve the use of [service endpoints](https://www.w3.org/TR/did-core/#services). See this example below:
 
 ```
 {
